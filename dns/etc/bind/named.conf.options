@@ -1,0 +1,41 @@
+acl internals { 127.0.0.0/8; 192.168.1.0/24; };
+
+options {
+        directory "/etc/bind";
+
+        // Exchange port between DNS servers
+        //query-source address * port *;
+
+        // Transmit requests to 8.8.8.8 if
+        // this server doesn't know how to resolve them
+        forward only;
+        forwarders { 8.8.8.8; };
+
+        auth-nxdomain no;    # conform to RFC1035
+
+        // Listen on local interfaces only(IPV4)
+        //listen-on-v6 { none; };
+        // listen-on { 127.0.0.1; 10.1.10.0/24; };
+        listen-on { any; };
+
+        // Do not transfer the zone information to the secondary DNS
+        allow-transfer { none; };
+
+        // Accept requests for internal network only
+        // allow-query { internals; };
+        allow-query { any; };
+
+        // Allow recursive queries to the local hosts
+        // recursion yes;
+        allow-recursion { internals; };
+
+        // Do not make public version of BIND
+        version none;
+};
+
+// Configure the communication channel for Administrative BIND9 with rndc
+// By default, they key is in the rndc.key file and is used by rndc and bind9
+// on the localhost
+controls {
+        inet 127.0.0.1 port 953 allow { 127.0.0.1; };
+};
